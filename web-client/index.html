@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BazinLand</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="login-screen" class="container">
+        <h2>Bazin</h2>
+        <input type="text" id="jid" placeholder="SMIA">
+        <input type="password" id="password" placeholder="Password">
+        <input type="password" id="secret" placeholder="encryption key">
+        <button id="connect-btn">Connect</button>
+        <div id="login-status"></div>
+    </div>
+
+    <div id="chat-screen" class="container" style="display: none; height: 90vh; flex-direction: column;">
+        <div id="chat-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span id="status-indicator">🟢 Connected</span>
+            <div>
+                <button id="change-key-btn" style="width: auto; padding: 2px 10px; margin: 0 5px;">🔑 Key</button>
+                <button id="logout-btn" style="width: auto; padding: 2px 10px;">🚪 Exit</button>
+            </div>
+        </div>
+        
+        <div style="display: flex; flex-grow: 1; gap: 10px; overflow: hidden; margin-bottom: 10px;">
+            <!-- Left Sidebar: Multi-Target Manager -->
+            <div style="width: 220px; border: 1px dashed #33ff00; padding: 10px; display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="new-target" placeholder="new_alice@chat...">
+                <button id="add-target-btn">Add Target</button>
+                <hr style="border: 0; border-top: 1px dashed #33ff00;">
+                <div id="target-list" style="display: flex; flex-direction: column; gap: 5px; overflow-y: auto;"></div>
+            </div>
+            
+            <!-- Right Side: Active Chat Box -->
+            <div id="chat-box" style="flex-grow: 1; border: 1px dashed #33ff00; padding: 10px; overflow-y: auto;">
+                <!-- Messages populate here based on selected target -->
+            </div>
+        </div>
+        
+        <div id="input-area">
+            <input type="text" id="msg-input" placeholder="Type a message to the active target... (Press Enter to send)">
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

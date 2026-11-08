@@ -1,0 +1,36 @@
+
+services:
+  prosody:
+    image: prosodyim/prosody:0.12
+    container_name: bazin-prosody
+    restart: unless-stopped
+    volumes:
+      - ./infra/prosody.cfg.lua.template:/etc/prosody/prosody.cfg.lua:ro
+      - prosody_data:/var/lib/prosody
+    expose:
+      - "5280"
+    networks:
+      - bazin-net
+
+  nginx:
+    image: nginx:alpine
+    container_name: bazin-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./web-client:/var/www/chat:ro
+      - ./infra/nginx.conf.template:/etc/nginx/conf.d/default.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - prosody
+    networks:
+      - bazin-net
+
+volumes:
+  prosody_data:
+
+networks:
+  bazin-net:
+    driver: bridge

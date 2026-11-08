@@ -1,0 +1,60 @@
+/* style.css - Primitive Terminal Design */
+body {
+    background-color: black;
+    color: #33ff00; /* Hacker Green */
+    font-family: "Courier New", Courier, monospace;
+    padding: 10px;
+}
+
+input, button {
+    background-color: black;
+    color: #33ff00;
+    border: 1px solid #33ff00;
+    font-family: inherit;
+    padding: 5px;
+    margin: 5px 0;
+}
+
+input:focus {
+    outline: none;
+    background-color: #111;
+}
+
+button:hover {
+    background-color: #33ff00;
+    color: black;
+    cursor: pointer;
+}
+
+#chat-box {
+    border: 1px dashed #33ff00;
+    padding: 10px;
+    height: 60vh;
+    overflow-y: scroll;
+    margin-bottom: 10px;
+}
+
+.msg-sender { font-weight: bold; }
+.msg-me { font-weight: bold; }
+.msg-system { font-style: italic; }
+
+/* Sidebar Target Buttons */
+.target-btn {
+    background-color: black;
+    color: #33ff00;
+    border: 1px solid #33ff00;
+    text-align: left;
+    padding: 5px;
+    cursor: pointer;
+    word-break: break-all;
+}
+
+.target-btn:hover {
+    background-color: #111;
+}
+
+.target-btn.active {
+    background-color: #33ff00;
+    color: black;
+    font-weight: bold;
+}

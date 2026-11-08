@@ -1,0 +1,92 @@
+---
+- name: Deploy Bazin Chat Zero-Knowledge XMPP Stack
+  hosts: all
+  become: true
+  vars:
+    domain: "chat.example.com"
+    admin_email: "admin@example.com"
+
+  tasks:
+    - name: 1. Install core dependencies
+      apt:
+        name: [nginx, prosody, ufw, certbot, python3-certbot-nginx]
+        state: present
+        update_cache: true
+
+    - name: 2. Configure UFW Firewall
+      ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop: ["22", "80", "443"]
+
+    - name: 3. Provision Let's Encrypt SSL
+      command: >
+        certbot certonly --nginx -d {{ domain }}
+        --non-interactive --agree-tos -m {{ admin_email }}
+      args:
+        creates: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+
+    - name: 4. Deploy Web Client files
+      copy:
+        src: ../web-client/
+        dest: /var/www/chat/
+        owner: www-data
+        group: www-data
+        mode: '0644'
+
+    - name: 5. Configure Domain in Web Client
+      replace:
+        path: /var/www/chat/app.js
+        regexp: 'chat\.example\.com'
+        replace: "{{ domain }}"
+
+    - name: 6. Deploy Prosody Configuration
+      copy:
+        src: prosody.cfg.lua.template
+        dest: /etc/prosody/prosody.cfg.lua
+        owner: root
+        group: prosody
+        mode: '0640'
+
+    - name: 7. Set Loopback and Domain in Prosody
+      replace:
+        path: /etc/prosody/prosody.cfg.lua
+        regexp: "{{ item.find }}"
+        replace: "{{ item.replace }}"
+      loop:
+        - { find: 'chat\.example\.com', replace: "{{ domain }}" }
+        - { find: 'http_interfaces = \{ "0\.0\.0\.0" \}', replace: 'http_interfaces = { "127.0.0.1" }' }
+      notify: Restart Prosody
+
+    - name: 8. Deploy Nginx Configuration
+      copy:
+        src: nginx.conf.template
+        dest: "/etc/nginx/sites-available/{{ domain }}"
+
+    - name: 9. Set Loopback and Domain in Nginx
+      replace:
+        path: "/etc/nginx/sites-available/{{ domain }}"
+        regexp: "{{ item.find }}"
+        replace: "{{ item.replace }}"
+      loop:
+        - { find: 'chat\.example\.com', replace: "{{ domain }}" }
+        - { find: 'http://prosody:5280', replace: 'http://127.0.0.1:5280' }
+
+    - name: 10. Enable Nginx Site
+      file:
+        src: "/etc/nginx/sites-available/{{ domain }}"
+        dest: "/etc/nginx/sites-enabled/{{ domain }}"
+        state: link
+      notify: Reload Nginx
+
+  handlers:
+    - name: Restart Prosody
+      service:
+        name: prosody
+        state: restarted
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded

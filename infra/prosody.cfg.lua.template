@@ -1,0 +1,55 @@
+-- Allow Nginx on localhost to proxy WebSocket connection
+cross_domain_websocket = { "https://chat.example.com" }
+trusted_proxies = { "127.0.0.1", "::1" }
+http_interfaces = { "0.0.0.0" }
+http_ports = { 5280 }
+https_ports = { }
+
+-- Tell Prosody the external connection is safely encrypted by Nginx
+consider_websocket_secure = true
+
+c2s_ports = { }
+
+
+-- Global Settings
+admins = { "alice@chat.example.com" }
+allow_registration = false -- Prevents public account creation
+c2s_require_encryption = true
+s2s_secure_auth = true
+s2s_require_encryption = true
+
+-- Security & Privacy: Disable Federation & Archiving
+modules_disabled = {
+    "s2s"; -- Completely disable Server-to-Server federation
+}
+
+modules_enabled = {
+    "roster"; -- Allow users to have a contact list
+    "saslauth"; -- Authentication
+    "tls"; -- Enforce encryption
+    "dialback";
+    "disco"; -- Service discovery
+    "posix";
+    "bosh"; -- Required for some clients
+    "websocket"; -- Modern client connections
+    
+    -- Mobile Optimizations (Essential for battery life)
+    "csi_simple";
+    "smacks"; -- Stream management for mobile drops
+--    "push"; -- Push notifications
+    
+    -- ZERO KNOWLEDGE: We explicitly DO NOT enable "mam" (Message Archive Management)
+    -- This guarantees messages are only delivered live and never stored on disk.
+}
+
+-- Logging: Errors only, no chat metadata
+log = {
+    error = "/var/log/prosody/prosody.err";
+}
+
+-- Virtual Host Configuration
+VirtualHost "chat.example.com"
+    ssl = {
+        key = "/etc/prosody/certs/chat.example.com.key";
+        certificate = "/etc/prosody/certs/chat.example.com.crt";
+    }
