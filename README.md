@@ -22,3 +22,32 @@ bazin-chat/
     ├── playbook.yml             # Ansible automated bare-metal deployment
     ├── nginx.conf.template      # Hardened Reverse Proxy + CSP config
     └── prosody.cfg.lua.template # Hardened XMPP + MUC WebSocket config
+```
+
+## Deployment Options
+
+### Option A: Docker Compose (Recommended)
+1. Replace `chat.example.com` in `web-client/app.js` and `infra/*` with your domain or LAN IP.
+2. Launch the stack:
+   ```bash
+   docker compose up -d
+   ```
+3. Create an XMPP user:
+   ```bash
+   docker exec -it bazin-prosody prosodyctl adduser alice@chat.example.com
+   ```
+
+### Option B: Bare-Metal via Ansible (`playbook.yml`)
+Deploy directly to a fresh Debian/Ubuntu server from your local machine:
+```bash
+ansible-playbook -i "your_server_ip," -u root infra/playbook.yml --extra-vars "domain=chat.yourdomain.com"
+```
+
+## Running the CLI Client
+```bash
+cd cli-client
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python txmpp.py
+```
